@@ -1,56 +1,53 @@
 const express = require("express");
-const gravatar = require("gravatar");
 const { check, validationResult } = require("express-validator");
-const routes = express.Router();
-const User = require("../../models/User");
+const gravatar = require("gravatar");
 const bcryptjs = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const routes = express.Router();
+const User = require("../../models/User");
 const config = require("config");
 
 //@access Public
-//@desc   Register the user
-//@route  POST /api/users
+//@Desc Test route
+//@route POST /api/users
 routes.post(
   "/",
   [
     check("name", "Name is required").not().isEmpty(),
-    check("email", "Please include a valid email").isEmail(),
-    check("password", "Please enter a password with min 6 characters").isLength(
-      { min: 6 },
-    ),
+    check("email", "Email is required").isEmail(),
+    check("password", "password is required").isLength({ min: 6 }),
   ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
+    const { name, email, password, avatar } = req.body;
 
     try {
-      // See if the user exists
-      const { name, email, password } = req.body;
       let user = await User.findOne({ email });
+
       if (user) {
         return res
           .status(400)
           .json({ errors: [{ msg: "User already exists" }] });
       }
-      // Get Users gravatar
+
+      // get user's gravatar
       const avatar = gravatar.url(email, {
         s: "200",
         r: "pg",
         d: "mm",
       });
-
       user = new User({
         name,
         email,
-        password,
         avatar,
+        password,
       });
-      // Encrypt password
-      const salt = await bcryptjs.genSalt(10);
-      const passwordHash = await bcryptjs.hash(password, salt);
-      user.password = passwordHash;
+      // encrypt password
+      const hashPassword = await bcryptjs.hash(password, 10);
+      user.password = hashPassword;
       await user.save();
       // return jsonwebtoken
       const payload = {
@@ -68,10 +65,11 @@ routes.post(
           res.json({ token });
         },
       );
-      // res.send(`${user.name} registered successfully`);
-    } catch (error) {
-      return res.status(500).send("Server error");
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send("Server Error");
     }
   },
 );
+
 module.exports = routes;
