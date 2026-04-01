@@ -1,4 +1,6 @@
 {
   "mongoURI": "mongodb+srv://abhilashasharma75_db_user:HLaDnIDqDfUWdg03@socialdev.7a1a552.mongodb.net/?appName=SocialDev",
-  "secretToken": "secretKeyToken"
+  "secretToken": "secretKeyToken",
+  "gitHubClientId": "Ov23liAtYarCpQulYfYT",
+  "gitHubSecret": "da847c4fe78b512b0e5ef8449418f9b0e55db48b"
 }
